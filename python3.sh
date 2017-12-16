@@ -3,6 +3,8 @@
 # Auto install Python3
 #
 # Copyright (C) 2017 evrmji
+# Thanks:
+# https://teddysun.com
 #
 # System Required:  CentOS 6+
 
