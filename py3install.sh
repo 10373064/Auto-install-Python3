@@ -147,14 +147,14 @@ download_files(){
 
 install_start(){
     download_files
-    echo -e "[${green}Info${plain}] Unzip ${python3_file}..."
+    echo -e "[${green}Info${plain}] Unzip ${python3_file} /c"
     tar vxf ${python3_file}.tar.xz  &> /dev/null && echo  -e  "${green}Success...${plain}" || echo -e "${red}Failed...${plain}"
     cd ${python3_file}
-    echo -e "[${green}Info${plain}] Pprepare compile..."
+    echo -e "[${green}Info${plain}] Pprepare compile /c"
     ./configure --prefix=${install_path}${python3_file}  &> /dev/null && echo  -e  "${green}Success...${plain}" || echo -e "${red}Failed...${plain}"
-    echo -e "[${green}Info${plain}] compiling..."
+    echo -e "[${green}Info${plain}] compiling /c"
     make -j   &> /dev/null && echo  -e  "${green}Success...${plain}" || echo -e "${red}Failed...${plain}"
-    echo -e "[${green}Info${plain}] Install..."
+    echo -e "[${green}Info${plain}] Install /c"
     make install  &> /dev/null && echo  -e  "${green}Success...${plain}" || echo -e "${red}Failed...${plain}"
     ln -s ${install_path}${python3_file}/bin/pip3  /usr/bin/pip3
     ln -s ${install_path}${python3_file}/bin/python3 /usr/bin/python3
