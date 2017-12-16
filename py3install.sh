@@ -167,6 +167,12 @@ install_start(){
     else
         echo -e "[${green}Success${plain}] ${python3_file}  link finish."
     fi
+    if python3 &> /dev/null; then 
+        echo -e "[${green}Success${plain}] ${python3_file} Finish install."
+    else
+        echo -e "[${red}Failed${plain}] ${python3_file} Install failed."
+        exit 1
+    fi
 
 }
 
