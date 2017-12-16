@@ -147,10 +147,10 @@ download_files(){
 
 install_start(){
     download_files
-    tar vxf ${python3_file}.tar.xz &> /dev/null && echo  -e  "[${green}Success${plain}]" || echo -e "[${red}Failed${plain}]"
+    tar vxf ${python3_file}.tar.xz
     cd ${python3_file}
     ./configure --prefix=${install_path}${python3_file}
-    make -j 8
+    make -j 4
     make install
     if [ $? -ne 0 ]; then
         echo -e "[${red}Failed${plain}] ${python3_file} install failed."
@@ -173,6 +173,9 @@ install_start(){
 }
 
 install_finish(){
+    echo "[${green}info${plain}] Clean temporary files"
+    rm -fr ${python3_file} &> /dev/null && echo  -e  "${green}Success...${plain}" || echo -e "${red}Failed...${plain}"
+    rm -fr ${python3_file}.tar.xz &> /dev/null && echo  -e  "${green}Success...${plain}" || echo -e "${red}Failed...${plain}"
     version=$( python3 --version )
     echo "[${green}info${plain}] Python Version: ${version}"
     echo "You can input \"python3\" to enter ${python3_file} and input \"pip3\" to manage your python3 packages."
