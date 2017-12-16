@@ -27,3 +27,4 @@ chmod +x python3.sh
 ./python3.sh 2>&1 | tee python3.log
 # If you lost the connecting of server you can use `screen -r pyinstall`. 
 ```
+![1](https://user-images.githubusercontent.com/20814857/34072486-4666d9ee-e2c3-11e7-8245-d2118fc4a7fe.png)
