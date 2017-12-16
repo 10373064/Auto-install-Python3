@@ -3,9 +3,11 @@
 # Auto install Python3
 #
 # Copyright (C) 2017 evrmji
+#
 # Thanks:
 # https://teddysun.com
-#
+# And a lot of things copy from there
+# 
 # System Required:  CentOS 6+
 
 clear
@@ -43,6 +45,51 @@ get_char() {
     stty $SAVEDSTTY
 }
 
+check_sys() {
+    local checkType=$1
+    local value=$2
+
+    local release=''
+    local systemPackage=''
+
+    if [ -f /etc/redhat-release ]; then
+        release="centos"
+        systemPackage="yum"
+    elif cat /etc/issue | grep -Eqi "debian"; then
+        release="debian"
+        systemPackage="apt"
+    elif cat /etc/issue | grep -Eqi "ubuntu"; then
+        release="ubuntu"
+        systemPackage="apt"
+    elif cat /etc/issue | grep -Eqi "centos|red hat|redhat"; then
+        release="centos"
+        systemPackage="yum"
+    elif cat /proc/version | grep -Eqi "debian"; then
+        release="debian"
+        systemPackage="apt"
+    elif cat /proc/version | grep -Eqi "ubuntu"; then
+        release="ubuntu"
+        systemPackage="apt"
+    elif cat /proc/version | grep -Eqi "centos|red hat|redhat"; then
+        release="centos"
+        systemPackage="yum"
+    fi
+
+    if [ ${checkType} == "sysRelease" ]; then
+        if [ "$value" == "$release" ]; then
+            return 0
+        else
+            return 1
+        fi
+    elif [ ${checkType} == "packageManager" ]; then
+        if [ "$value" == "$systemPackage" ]; then
+            return 0
+        else
+            return 1
+        fi
+    fi
+}
+
 detect_depends(){
     local command=$1
     local depend=`echo "${command}" | awk '{print $4}'`
@@ -54,13 +101,32 @@ detect_depends(){
 }
 
 depends_install(){
-    echo -e "[${green}Info${plain}] Install depends.."
+    if check_sys packageManager yum; then
+        echo -e "[${green}Info${plain}] Checking the EPEL repository..."
+        if [ ! -f /etc/yum.repos.d/epel.repo ]; then
+            yum install -y -q epel-release
+        fi
+        [ ! -f /etc/yum.repos.d/epel.repo ] && echo -e "[${red}Error${plain}] Install EPEL repository failed, please check it." && exit 1
+        [ ! "$(command -v yum-config-manager)" ] && yum install -y -q yum-utils
+        if [ x"`yum-config-manager epel | grep -w enabled | awk '{print $3}'`" != x"True" ]; then
+            yum-config-manager --enable epel
+        fi
+        echo -e "[${green}Info${plain}] Checking the EPEL repository complete..."
+
         yum_depends=(
             zlib-devel bzip2-devel openssl-devel ncurses-devel sqlite-devel readline-devel tk-devel gcc wget make xz
         )
         for depend in ${yum_depends[@]}; do
             detect_depends "yum -y -q install ${depend}"
         done
+    elif check_sys packageManager apt; then
+        apt_depends=(
+            zlib-devel bzip2-devel openssl-devel ncurses-devel sqlite-devel readline-devel tk-devel gcc wget make xz
+        )
+        for depend in ${apt_depends[@]}; do
+            detect_depends "apt-get -y install ${depend}"
+        done
+    fi
 }
 
 download() { 
@@ -116,13 +182,12 @@ install_finish(){
 }
 
 install_python(){
-    echo
-    echo "Press any key to start...or Press Ctrl+C to cancel"
-    char=`get_char`
     depends_install
     install_start
     install_finish
 }
 
+echo
+echo "Press any key to start...or Press Ctrl+C to cancel"
+char=`get_char`
 install_python
-
