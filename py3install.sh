@@ -130,9 +130,9 @@ depends_install(){
 download() { 
     local filename=$(basename $1)
     if [ -f ${1} ]; then
-        echo "[${green}Info${plain}] ${filename} [${green}found${plain}]"
+        echo -e "[${green}Info${plain}] ${filename} [${green}found${plain}]"
    else
-        echo "[${green}Info${plain}] ${filename} not found, download now..."
+        echo -e "[${green}Info${plain}] ${filename} not found, download now..."
         wget --no-check-certificate -c -t3 -T60 -O ${1} ${2}
         if [ $? -ne 0 ]; then
             echo -e "[${red}Error${plain}] Download ${filename} failed."
