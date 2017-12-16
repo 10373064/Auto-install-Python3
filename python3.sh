@@ -147,10 +147,11 @@ download_files(){
 
 install_start(){
     download_files
+    rm -fr ${python3_file}
     tar vxf ${python3_file}.tar.xz
     cd ${python3_file}
     ./configure --prefix=${install_path}${python3_file}
-    make -j 4
+    make -j 12
     make install
     if [ $? -ne 0 ]; then
         echo -e "[${red}Failed${plain}] ${python3_file} install failed."
