@@ -4,6 +4,10 @@ Auto install Python3
 Only for centos 6+, **now**
 ## Quick start
 ```bash
+wget --no-check-certificate -O python3.sh https://git.io/vbojf && chmod +x python3.sh && bash python3.sh
+```
+
+```bash
 wget --no-check-certificate -O python3.sh https://raw.githubusercontent.com/evrmji/Auto-install-Python3/master/python3.sh && chmod +x python3.sh && bash python3.sh
 ```
 
