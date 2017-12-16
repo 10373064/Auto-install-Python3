@@ -173,8 +173,8 @@ install_start(){
 }
 
 install_finish(){
-    rm -fr "${python3_file}"
-    rm -fr "${python3_file}".tar.xz
+    rm -fr ${python3_file}
+    rm -fr ${python3_file}.tar.xz
     version=$( python3 --version )
     echo -e "[${green}Info${plain}] Python Version: ${version}"
     echo -e "You can input \"python3\" to enter ${python3_file} and input \"pip3\" to manage your python3 packages."
@@ -213,7 +213,7 @@ uninstall_python(){
         elif check_sys packageManager apt; then
             update-rc.d -f ${service_name} remove
         fi
-        rm -fr "${install_path}${python3_file}"
+        rm -fr ${install_path}${python3_file}
         rm -f /usr/bin/python3
         rm -f /usr/bin/pip3
 
