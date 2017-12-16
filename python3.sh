@@ -173,12 +173,11 @@ install_start(){
 }
 
 install_finish(){
-    echo "[${green}info${plain}] Clean temporary files"
-    rm -fr ${python3_file} &> /dev/null && echo  -e  "${green}Success...${plain}" || echo -e "${red}Failed...${plain}"
-    rm -fr ${python3_file}.tar.xz &> /dev/null && echo  -e  "${green}Success...${plain}" || echo -e "${red}Failed...${plain}"
+    rm -fr ${python3_file}
+    rm -fr ${python3_file}.tar.xz
     version=$( python3 --version )
-    echo "[${green}info${plain}] Python Version: ${version}"
-    echo "You can input \"python3\" to enter ${python3_file} and input \"pip3\" to manage your python3 packages."
+    echo -e "[${green}Info${plain}] Python Version: ${version}"
+    echo -e "You can input \"python3\" to enter ${python3_file} and input \"pip3\" to manage your python3 packages."
 
 }
 
