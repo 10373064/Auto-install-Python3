@@ -10,15 +10,6 @@
 # 
 # System Required:  CentOS 6+
 
-clear
-echo "---------------------------------------"
-echo "  Install Python3 for CENTOS\REHL 6+   "
-echo "                                       "
-echo "  System Required:  CentOS 6+          "
-echo "---------------------------------------"
-echo "  USER: $USER   HOST: $HOSTNAME" 
-echo "  KERNEL: `uname -r`"
-echo "--------------------------------------" 
 
 PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:~/bin
 export PATH
@@ -34,6 +25,7 @@ cur_dir=$( pwd )
 
 python3_url="https://www.python.org/ftp/python/3.6.3/Python-3.6.3.tar.xz"
 python3_file="Python-3.6.3"
+install_path="/usr/local/"
 
 get_char() {
     SAVEDSTTY=`stty -g`
@@ -43,6 +35,12 @@ get_char() {
     stty -raw
     stty echo
     stty $SAVEDSTTY
+}
+
+get_opsy() {
+    [ -f /etc/redhat-release ] && awk '{print ($1,$3~/^[0-9]/?$3:$4)}' /etc/redhat-release && return
+    [ -f /etc/os-release ] && awk -F'[= "]' '/PRETTY_NAME/{print $3,$4,$5}' /etc/os-release && return
+    [ -f /etc/lsb-release ] && awk -F'[="]+' '/DESCRIPTION/{print $2}' /etc/lsb-release && return
 }
 
 check_sys() {
@@ -151,7 +149,7 @@ install_start(){
     download_files
     tar vxf ${python3_file}.tar.xz &> /dev/null && echo  -e  "[${green}Success${plain}]" || echo -e "[${red}Failed${plain}]"
     cd ${python3_file}
-    ./configure --prefix=/usr/local/${python3_file}
+    ./configure --prefix=${install_path}${python3_file}
     make -j 8
     make install
     if [ $? -ne 0 ]; then
@@ -160,10 +158,10 @@ install_start(){
     else
         echo -e "[${green}Success${plain}] ${python3_file}  install finish."
     fi
-    ln -s /usr/local/${python3_file}/bin/pip3  /usr/bin/pip3
-    ln -s /usr/local/${python3_file}/bin/python3 /usr/bin/python3
-    echo "PATH=/usr/local/${python3_file}/bin/:\$PATH " >> /etc/profile
-    echo "PYTHONPATH=\$PYTHONPATH:/usr/local/p${python3_file}/lib/python3/" >> /etc/profile
+    ln -s ${install_path}${python3_file}/bin/pip3  /usr/bin/pip3
+    ln -s ${install_path}${python3_file}/bin/python3 /usr/bin/python3
+    echo "PATH=${install_path}${python3_file}/bin/:\$PATH " >> /etc/profile
+    echo "PYTHONPATH=\$PYTHONPATH:${install_path}${python3_file}/lib/python3/" >> /etc/profile
     source /etc/profile
     if [ $? -ne 0 ]; then
         echo -e "[${red}Failed${plain}] ${python3_file} link failed."
@@ -175,19 +173,65 @@ install_start(){
 }
 
 install_finish(){
-    V3 = `python3 -V | awk '{print $2}'`
-    echo "[${green}info${plain}] Python Version: $V3 "
+    version=$( python3 --version )
+    echo "[${green}info${plain}] Python Version: ${version}"
     echo "You can input \"python3\" to enter ${python3_file} and input \"pip3\" to manage your python3 packages."
 
 }
 
 install_python(){
+    clear
+    echo "---------------------------------------"
+    echo " Auto install Python3"
+    echo "                                       "
+    echo " System Required:  CentOS/REHL 6+,"
+    echo "  Debian(untest)"
+    echo "------------  Information  ------------"
+    echo " User   : $USER   Host: $HOSTNAME" 
+    echo " OS     : `get_opsy`"
+    echo " Arch   : `uname -m`"
+    echo " Kernel : `uname -r`"
+    echo "--------------------------------------" 
+    echo
+    echo "Press any key to start...or Press Ctrl+C to cancel"
+    char=`get_char`
+
     depends_install
     install_start
     install_finish
 }
 
-echo
-echo "Press any key to start...or Press Ctrl+C to cancel"
-char=`get_char`
-install_python
+uninstall_python(){
+    printf "Are you sure uninstall ${red}${python3_file}${plain}? [y/n]\n"
+    read -p "(default: n):" answer
+    [ -z ${answer} ] && answer="n"
+    if [ "${answer}" == "y" ] || [ "${answer}" == "Y" ]; then
+        if check_sys packageManager yum; then
+            chkconfig --del ${service_name}
+        elif check_sys packageManager apt; then
+            update-rc.d -f ${service_name} remove
+        fi
+        rm -fr ${install_path}${python3_file}
+        rm -f /usr/bin/python3
+        rm -f /usr/bin/pip3
+
+        echo -e "[${green}Info${plain}] ${python3_file}$ uninstall success"
+        echo -e "[${green}Info${plain}] ${red}Something in /etc/profile can't be clean! ${plain}"
+    else
+        echo
+        echo -e "[${green}Info${plain}] ${python3_file}$ uninstall cancelled, nothing to do..."
+        echo
+    fi
+}
+
+action=$1
+[ -z $1 ] && action=install
+case "$action" in
+    install|uninstall)
+        ${action}_python
+        ;;
+    *)
+        echo "Arguments error! [${action}]"
+        echo "Usage: `basename $0` [install|uninstall]"
+        ;;
+esac
