@@ -171,8 +171,8 @@ install_start(){
 }
 
 install_finish(){
-    rm -fr "${python3_file}"
-    rm -fr "${python3_file}".tar.xz
+    rm -fr ${python3_file}
+    rm -fr ${python3_file}.tar.xz
     version=$( python3 --version )
     echo -e "[${green}Info${plain}] Python Version: ${version}"
     echo -e "You can input \"python3\" to enter ${python3_file} and input \"pip3\" to manage your python3 packages."
