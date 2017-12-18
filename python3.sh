@@ -147,7 +147,7 @@ download_files(){
 
 install_start(){
     download_files
-    rm -fr ${python3_file}
+    rm -fr ${cur_dir}${python3_file}
     tar vxf ${python3_file}.tar.xz
     cd ${python3_file}
     ./configure --prefix=${install_path}${python3_file}
@@ -174,8 +174,8 @@ install_start(){
 }
 
 install_finish(){
-    rm -fr ${python3_file}
-    rm -fr ${python3_file}.tar.xz
+    rm -fr ${cur_dir}${python3_file}
+    rm -fr ${cur_dir}${python3_file}.tar.xz
     version=$( python3 --version )
     echo -e "[${green}Info${plain}] Python Version: ${version}"
     echo -e "You can input \"python3\" to enter ${python3_file} and input \"pip3\" to manage your python3 packages."
