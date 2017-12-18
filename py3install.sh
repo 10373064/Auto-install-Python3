@@ -154,7 +154,7 @@ install_start(){
     echo -e "[${green}Info${plain}] prepare compile \c"
     ./configure --prefix=${install_path}${python3_file}  &> /dev/null && echo  -e  "${green}success...${plain}" || echo -e "${red}failed...${plain}"
     echo -e "[${green}Info${plain}] compiling \c"
-    make -j 12  &> /dev/null && echo  -e  "${green}success...${plain}" || echo -e "${red}failed...${plain}"
+    make -j 4  &> /dev/null && echo  -e  "${green}success...${plain}" || echo -e "${red}failed...${plain}"
     echo -e "[${green}Info${plain}] install \c"
     make install -j 4 &> /dev/null && echo  -e  "${green}success...${plain}" || echo -e "${red}failed...${plain}"
     ln -s ${install_path}${python3_file}/bin/pip3  /usr/bin/pip3
