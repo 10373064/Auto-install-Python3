@@ -37,8 +37,26 @@ get_char() {
     stty $SAVEDSTTY
 }
 
+get_opsy() {
+    [ -f /etc/redhat-release ] && awk '{print ($1,$3~/^[0-9]/?$3:$4)}' /etc/redhat-release && return
+    [ -f /etc/os-release ] && awk -F'[= "]' '/PRETTY_NAME/{print $3,$4,$5}' /etc/os-release && return
+    [ -f /etc/lsb-release ] && awk -F'[="]+' '/DESCRIPTION/{print $2}' /etc/lsb-release && return
+}
+
+
 detect_depends(){
-    if [cat /etc/issue
+    if [ get_opsy == 'ubuntu' || get_opsy == 'debian']; then
+        apt-get install -y zlib-devel bzip2-devel openssl-devel ncurses-devel sqlite-devel readline-devel tk-devel gcc wget make xz
+    fi
+    if [ get_opsy == 'centos' || get_opsy == 'fedora' || get_opsy == 'rhel']; then
+        yum install -y zlib-devel bzip2-devel openssl-devel ncurses-devel sqlite-devel readline-devel tk-devel gcc wget make xz
+    fi
+    if [ get_opsy == 'archlinux' ]; then
+        yaourt install -y zlib-devel bzip2-devel openssl-devel ncurses-devel sqlite-devel readline-devel tk-devel gcc wget make xz
+    fi
+    if [ get_opsy == 'gentoo']; then
+        emerge -av denyhosts -y zlib-devel bzip2-devel openssl-devel ncurses-devel sqlite-devel readline-devel tk-devel gcc wget make xz
+    fi
     if [ $? != 0 ]; then
         echo -e "[${red}Error${plain}] Failed to install ${red}${depend}${plain}"
         exit 1
