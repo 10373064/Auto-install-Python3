@@ -37,95 +37,14 @@ get_char() {
     stty $SAVEDSTTY
 }
 
-get_opsy() {
-    [ -f /etc/redhat-release ] && awk '{print ($1,$3~/^[0-9]/?$3:$4)}' /etc/redhat-release && return
-    [ -f /etc/os-release ] && awk -F'[= "]' '/PRETTY_NAME/{print $3,$4,$5}' /etc/os-release && return
-    [ -f /etc/lsb-release ] && awk -F'[="]+' '/DESCRIPTION/{print $2}' /etc/lsb-release && return
-}
-
-check_sys() {
-    local checkType=$1
-    local value=$2
-
-    local release=''
-    local systemPackage=''
-
-    if [ -f /etc/redhat-release ]; then
-        release="centos"
-        systemPackage="yum"
-    elif cat /etc/issue | grep -Eqi "debian"; then
-        release="debian"
-        systemPackage="apt"
-    elif cat /etc/issue | grep -Eqi "ubuntu"; then
-        release="ubuntu"
-        systemPackage="apt"
-    elif cat /etc/issue | grep -Eqi "centos|red hat|redhat"; then
-        release="centos"
-        systemPackage="yum"
-    elif cat /proc/version | grep -Eqi "debian"; then
-        release="debian"
-        systemPackage="apt"
-    elif cat /proc/version | grep -Eqi "ubuntu"; then
-        release="ubuntu"
-        systemPackage="apt"
-    elif cat /proc/version | grep -Eqi "centos|red hat|redhat"; then
-        release="centos"
-        systemPackage="yum"
-    fi
-
-    if [ ${checkType} == "sysRelease" ]; then
-        if [ "$value" == "$release" ]; then
-            return 0
-        else
-            return 1
-        fi
-    elif [ ${checkType} == "packageManager" ]; then
-        if [ "$value" == "$systemPackage" ]; then
-            return 0
-        else
-            return 1
-        fi
-    fi
-}
-
 detect_depends(){
-    local command=$1
-    local depend=`echo "${command}" | awk '{print $4}'`
-    ${command}
+    if [cat /etc/issue
     if [ $? != 0 ]; then
         echo -e "[${red}Error${plain}] Failed to install ${red}${depend}${plain}"
         exit 1
     fi
 }
 
-depends_install(){
-    if check_sys packageManager yum; then
-        echo -e "[${green}Info${plain}] Checking the EPEL repository..."
-        if [ ! -f /etc/yum.repos.d/epel.repo ]; then
-            yum install -y -q epel-release
-        fi
-        [ ! -f /etc/yum.repos.d/epel.repo ] && echo -e "[${red}Error${plain}] Install EPEL repository failed, please check it." && exit 1
-        [ ! "$(command -v yum-config-manager)" ] && yum install -y -q yum-utils
-        if [ x"`yum-config-manager epel | grep -w enabled | awk '{print $3}'`" != x"True" ]; then
-            yum-config-manager --enable epel
-        fi
-        echo -e "[${green}Info${plain}] Checking the EPEL repository complete..."
-
-        yum_depends=(
-            zlib-devel bzip2-devel openssl-devel ncurses-devel sqlite-devel readline-devel tk-devel gcc wget make xz
-        )
-        for depend in ${yum_depends[@]}; do
-            detect_depends "yum -y -q install ${depend}"
-        done
-    elif check_sys packageManager apt; then
-        apt_depends=(
-            zlib-devel bzip2-devel openssl-devel ncurses-devel sqlite-devel readline-devel tk-devel gcc wget make xz
-        )
-        for depend in ${apt_depends[@]}; do
-            detect_depends "apt-get -y install ${depend}"
-        done
-    fi
-}
 
 download() { 
     local filename=$(basename $1)
@@ -141,17 +60,12 @@ download() {
     fi
 }
 
-download_files(){
+install(){
     download "${python3_file}.tar.xz" "${python3_url}"
-}
-
-install_start(){
-    download_files
-    rm -fr ${cur_dir}/${python3_file}
     tar vxf ${python3_file}.tar.xz
     cd ${python3_file}
     ./configure --prefix=${install_path}${python3_file}
-    make -j 4
+    make -j4
     make install
     if [ $? -ne 0 ]; then
         echo -e "[${red}Failed${plain}] ${python3_file} install failed."
@@ -164,22 +78,11 @@ install_start(){
     echo "PATH=${install_path}${python3_file}/bin/:\$PATH " >> /etc/profile
     echo "PYTHONPATH=\$PYTHONPATH:${install_path}${python3_file}/lib/python3/" >> /etc/profile
     source /etc/profile
-    if [ $? -ne 0 ]; then
-        echo -e "[${red}Failed${plain}] ${python3_file} link failed."
-        exit 1
-    else
-        echo -e "[${green}Success${plain}] ${python3_file}  link finish."
-    fi
-
-}
-
-install_finish(){
     rm -fr ${cur_dir}/${python3_file}
     rm -fr ${cur_dir}/${python3_file}.tar.xz
     version=$( python3 --version )
     echo -e "[${green}Info${plain}] Python Version: ${version}"
     echo -e "You can input \"python3\" to enter ${python3_file} and input \"pip3\" to manage your python3 packages."
-
 }
 
 install_python(){
@@ -199,9 +102,7 @@ install_python(){
     echo "Press any key to start...or Press Ctrl+C to cancel"
     char=`get_char`
 
-    depends_install
-    install_start
-    install_finish
+    install
 }
 
 uninstall_python(){
@@ -214,7 +115,7 @@ uninstall_python(){
         elif check_sys packageManager apt; then
             update-rc.d -f ${service_name} remove
         fi
-        rm -fr ${install_path}${python3_file}
+        rm -rf ${install_path}${python3_file}
         rm -f /usr/bin/python3
         rm -f /usr/bin/pip3
 
