@@ -19,8 +19,6 @@ red='\033[0;31m'
 yellow='\033[0;33m'
 plain='\033[0m'
 
-[[ $EUID -ne 0 ]] && echo -e "[${red}Error${plain}] This script must be run as root!" && exit 1
-
 cur_dir=$( pwd )
 
 python3_url="https://www.python.org/ftp/python/3.6.4/Python-3.6.4.tar.xz"
