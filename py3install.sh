@@ -23,8 +23,8 @@ plain='\033[0m'
 
 cur_dir=$( pwd )
 
-python3_url="https://www.python.org/ftp/python/3.6.3/Python-3.6.3.tar.xz"
-python3_file="Python-3.6.3"
+python3_url="https://www.python.org/ftp/python/3.6.4/Python-3.6.4.tar.xz"
+python3_file="Python-3.6.4"
 install_path="/usr/local/"
 
 get_char() {
